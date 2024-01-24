@@ -3,6 +3,10 @@
 const int cardY = 10;
 
 LGFX_Sprite sprite = LGFX_Sprite(&M5Cardputer.Display);
+u8_t deck[13 * 4];
+int card_index = 0;
+
+static u8_t hand[5] = {};
 
 void setup()
 {
@@ -11,11 +15,22 @@ void setup()
     // width = 240
     // height = 135
     sprite.setRotation(1);
+
+    for (int i = 0; i < 13 * 4; i++)
+    {
+        deck[i] = i;
+    }
+
+    shuffle();
+
+    for (int i = 0; i < 5; i++)
+    {
+        hand[i] = dealCard();
+    }
 }
 
 void loop()
 {
-    static u8_t cards[5] = {0x00, 0x11, 0x22, 0x33, 0x40};
     static u8_t holds = 0;
     M5Cardputer.update();
 
@@ -52,34 +67,44 @@ void loop()
             {
                 if (!(holds & (1 << i)))
                 {
-                    cards[i] = randCard();
+                    hand[i] = dealCard();
                 }
             }
             holds = 0;
+            shuffle();
         }
     }
 
     sprite.clear();
 
-    drawCards(cards, holds);
+    drawCards(hand, holds);
 
     sprite.pushSprite(0, 0);
     delay(40);
 }
 
-u8_t randCard()
+void shuffle()
 {
-    int n = random(13);
-    int s = random(4);
-
-    return (n << 4) | s;
+    card_index = 0;
+    for (int i = 0; i < 51; i++)
+    {
+        int j = random(i, 52);
+        u8_t tmp = deck[i];
+        deck[i] = deck[j];
+        deck[j] = tmp;
+    }
 }
 
-void drawCards(u8_t cards[5], u8_t holds)
+u8_t dealCard()
+{
+    return deck[(card_index++) % 52];
+}
+
+void drawCards(u8_t hand[5], u8_t holds)
 {
     for (int i = 0; i < 5; i++)
     {
-        drawCard(cards[i], i);
+        drawCard(hand[i], i);
     }
 
     sprite.setTextDatum(middle_center);
@@ -106,8 +131,8 @@ void drawCard(u8_t card, int pos)
 
     sprite.setTextDatum(top_left);
     sprite.setTextSize(2);
-    sprite.drawString(numbers[card >> 4], x + 5, cardY + 5);
+    sprite.drawString(numbers[card / 4], x + 5, cardY + 5);
 
     sprite.setTextDatum(middle_center);
-    sprite.drawString(suits[card & 0x0F], x + 21, cardY + 35);
+    sprite.drawString(suits[card % 4], x + 21, cardY + 35);
 }
