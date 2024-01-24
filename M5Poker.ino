@@ -1,5 +1,7 @@
 #include <M5Cardputer.h>
 
+const int cardY = 10;
+
 LGFX_Sprite sprite = LGFX_Sprite(&M5Cardputer.Display);
 
 void setup()
@@ -43,6 +45,18 @@ void loop()
         {
             holds ^= 0x10;
         }
+
+        if (M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER))
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (!(holds & (1 << i)))
+                {
+                    cards[i] = randCard();
+                }
+            }
+            holds = 0;
+        }
     }
 
     sprite.clear();
@@ -51,6 +65,14 @@ void loop()
 
     sprite.pushSprite(0, 0);
     delay(40);
+}
+
+u8_t randCard()
+{
+    int n = random(13);
+    int s = random(4);
+
+    return (n << 4) | s;
 }
 
 void drawCards(u8_t cards[5], u8_t holds)
@@ -66,7 +88,7 @@ void drawCards(u8_t cards[5], u8_t holds)
     {
         if (holds & (1 << i))
         {
-            sprite.drawString("HOLD", 5 + i * (42 + 5) + 21, 10 + 60 + 5);
+            sprite.drawString("HOLD", 5 + i * (42 + 5) + 21, cardY + 60 + 5);
         }
     }
 }
@@ -78,15 +100,14 @@ void drawCard(u8_t card, int pos)
     // TODO: Draw graphical suites
     const char *suits[4] = {"S", "D", "C", "H"};
 
-    const int y = 10;
     int x = 5 + pos * (42 + 5);
 
-    sprite.drawRect(x, y, 42, 60, TFT_WHITE);
+    sprite.drawRect(x, cardY, 42, 60, TFT_WHITE);
 
     sprite.setTextDatum(top_left);
     sprite.setTextSize(2);
-    sprite.drawString(numbers[card >> 4], x + 5, y + 5);
+    sprite.drawString(numbers[card >> 4], x + 5, cardY + 5);
 
     sprite.setTextDatum(middle_center);
-    sprite.drawString(suits[card & 0x0F], x + 21, y + 35);
+    sprite.drawString(suits[card & 0x0F], x + 21, cardY + 35);
 }
