@@ -367,7 +367,7 @@ void drawInfo()
 {
     sprite.setTextDatum(top_left);
     sprite.setTextSize(1.5);
-    sprite.drawString("Jack or better", 5, 5);
+    sprite.drawString("Jacks or better", 5, 5);
     sprite.drawString("Credit: ", 5, 120);
     sprite.drawString(String(credit), 68, 120);
 }
